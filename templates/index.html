@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map of Europe</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            height: 60vh;
+        }
+
+        .title {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 24px;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            max-width: 40%;
+            overflow: hidden;
+            margin-left: 400px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .legend {
+            width: 300px;
+            background-color: #f9f9f9;
+            border-left: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 10px;
+            max-height: calc(100vh - 100px); /* Ustawienie maksymalnej wysokości dla legendy */
+        }
+
+        .legend h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .legend div {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .legend div span {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .buttons {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .buttons button {
+            margin: 0 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Map of Europe</div>
+        <div class="content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="legend" id="legend">
+                <h3>Currency Legend</h3>
+                <div><span style="background-color: blue;"></span> Euro</div>
+                <div><span style="background-color: red;"></span> Polish złoty</div>
+                <div><span style="background-color: green;"></span> Swedish krona</div>
+                <div><span style="background-color: purple;"></span> Danish krone</div>
+                <div><span style="background-color: yellow;"></span> Icelandic króna</div>
+                <div><span style="background-color: orange;"></span> British pound</div>
+                <div><span style="background-color: brown;"></span> Swiss franc</div>
+                <div><span style="background-color: black;"></span> Norwegian krone</div>
+                <div><span style="background-color: gray;"></span> Czech koruna</div>
+                <div><span style="background-color: cyan;"></span> Hungarian forint</div>
+                <div><span style="background-color: magenta;"></span> Bulgarian lev</div>
+                <div><span style="background-color: lime;"></span> Romanian leu</div>
+            </div>
+        </div>
+        <div class="buttons">
+            <button onclick="showCurrencies()">Currencies</button>
+            <button onclick="showLanguages()">Languages</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const map = L.map('map').setView([54.5260, 15.2551], 4);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
+
+        const currencyColors = {
+            'Euro': 'blue',
+            'Polish złoty': 'red',
+            'Swedish krona': 'green',
+            'Danish krone': 'purple',
+            'Icelandic króna': 'yellow',
+            'British pound': 'orange',
+            'Swiss franc': 'brown',
+            'Norwegian krone': 'black',
+            'Czech koruna': 'gray',
+            'Hungarian forint': 'cyan',
+            'Bulgarian lev': 'magenta',
+            'Romanian leu': 'lime',
+        };
+
+        const data = {
+            "AT": {"currency":"Euro","latlng":[47.33333333,13.33333333],"name":"Austria"},
+            "BE": {"currency":"Euro","latlng":[50.83333333,4.0],"name":"Belgium"},
+            "BG": {"currency":"Bulgarian lev","latlng":[43.0,25.0],"name":"Bulgaria"},
+            "CH": {"currency":"Swiss franc","latlng":[47.0,8.0],"name":"Switzerland"},
+            "CY": {"currency":"Euro","latlng":[35.0,33.0],"name":"Cyprus"},
+            "CZ": {"currency":"Czech koruna","latlng":[49.75,15.5],"name":"Czechia"},
+            "DE": {"currency":"Euro","latlng":[51.0,9.0],"name":"Germany"},
+            "DK": {"currency":"Danish krone","latlng":[56.0,10.0],"name":"Denmark"},
+            "EE": {"currency":"Euro","latlng":[59.0,26.0],"name":"Estonia"},
+            "ES": {"currency":"Euro","latlng":[40.0,-4.0],"name":"Spain"},
+            "FI": {"currency":"Euro","latlng":[64.0,26.0],"name":"Finland"},
+            "FR": {"currency":"Euro","latlng":[46.0,2.0],"name":"France"},
+            "GB": {"currency":"British pound","latlng":[54.0,-2.0],"name":"United Kingdom"},
+            "GR": {"currency":"Euro","latlng":[39.0,22.0],"name":"Greece"},
+            "HR": {"currency":"Euro","latlng":[45.16666666,15.5],"name":"Croatia"},
+            "HU": {"currency":"Hungarian forint","latlng":[47.0,20.0],"name":"Hungary"},
+            "IE": {"currency":"Euro","latlng":[53.0,-8.0],"name":"Ireland"},
+            "IS": {"currency":"Icelandic króna","latlng":[65.0,-18.0],"name":"Iceland"},
+            "IT": {"currency":"Euro","latlng":[42.83333333,12.83333333],"name":"Italy"},
+            "LT": {"currency":"Euro","latlng":[56.0,24.0],"name":"Lithuania"},
+            "LU": {"currency":"Euro","latlng":[49.75,6.16666666],"name":"Luxembourg"},
+            "LV": {"currency":"Euro","latlng":[57.0,25.0],"name":"Latvia"},
+            "MT": {"currency":"Euro","latlng":[35.9375,14.3754],"name":"Malta"},
+            "NL": {"currency":"Euro","latlng":[52.5,5.75],"name":"Netherlands"},
+            "NO": {"currency":"Norwegian krone","latlng":[62.0,10.0],"name":"Norway"},
+            "PL": {"currency":"Polish złoty","latlng":[52.0,20.0],"name":"Poland"},
+            "PT": {"currency":"Euro","latlng":[39.5,-8.0],"name":"Portugal"},
+            "RO": {"currency":"Romanian leu","latlng":[46.0,25.0],"name":"Romania"},
+            "SE": {"currency":"Swedish krona","latlng":[62.0,15.0],"name":"Sweden"},
+            "SI": {"currency":"Euro","latlng":[46.11666666,14.81666666],"name":"Slovenia"},
+            "SK": {"currency":"Euro","latlng":[48.66666666,19.5],"name":"Slovakia"}
+        };
+
+        function showCurrencies() {
+            map.eachLayer(layer => {
+                if (layer instanceof L.CircleMarker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            for (const countryCode in data) {
+                const country = data[countryCode];
+                if (country.currency) {
+                    const currency = country.currency;
+                    const color = currencyColors[currency] || 'black';
+
+                    const marker = L.circleMarker(country.latlng, {
+                        color: color,
+                        radius: 5
+                    }).addTo(map);
+
+                    marker.bindPopup(`<b>${country.name}</b><br>Currency: ${country.currency}`);
+                }
+            }
+        }
+
+        function showLanguages() {
+            alert("Functionality for showing languages is not implemented yet.");
+        }
+
+        showCurrencies();
+    </script>
+</body>
+</html>
