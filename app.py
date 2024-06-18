@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, jsonify, render_template
 import requests
 
 app = Flask(__name__)
@@ -33,6 +33,19 @@ def get_currencies():
                 'latlng': country['latlng'] if 'latlng' in country else [0, 0]
             }
     return jsonify(currencies)
+
+@app.route('/languages')
+def get_languages():
+    countries = get_country_data()
+    languages = []
+    for country in countries:
+        if country['cca2'] in EUROPEAN_COUNTRIES:
+            languages.append({
+                'name': country['name']['common'],
+                'languages': list(country.get('languages', {}).values()),
+                'latlng': country['latlng'] if 'latlng' in country else [0, 0]
+            })
+    return jsonify(languages)
 
 if __name__ == '__main__':
     app.run(debug=True)

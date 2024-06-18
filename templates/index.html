@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Map of Europe</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         body {
@@ -53,7 +52,7 @@
             border-left: 1px solid #ddd;
             overflow-y: auto;
             padding: 10px;
-            max-height: calc(100vh - 100px); /* Ustawienie maksymalnej wysokości dla legendy */
+            max-height: calc(100vh - 100px);
         }
 
         .legend h3 {
@@ -141,65 +140,52 @@
             'Romanian leu': 'lime',
         };
 
-        const data = {
-            "AT": {"currency":"Euro","latlng":[47.33333333,13.33333333],"name":"Austria"},
-            "BE": {"currency":"Euro","latlng":[50.83333333,4.0],"name":"Belgium"},
-            "BG": {"currency":"Bulgarian lev","latlng":[43.0,25.0],"name":"Bulgaria"},
-            "CH": {"currency":"Swiss franc","latlng":[47.0,8.0],"name":"Switzerland"},
-            "CY": {"currency":"Euro","latlng":[35.0,33.0],"name":"Cyprus"},
-            "CZ": {"currency":"Czech koruna","latlng":[49.75,15.5],"name":"Czechia"},
-            "DE": {"currency":"Euro","latlng":[51.0,9.0],"name":"Germany"},
-            "DK": {"currency":"Danish krone","latlng":[56.0,10.0],"name":"Denmark"},
-            "EE": {"currency":"Euro","latlng":[59.0,26.0],"name":"Estonia"},
-            "ES": {"currency":"Euro","latlng":[40.0,-4.0],"name":"Spain"},
-            "FI": {"currency":"Euro","latlng":[64.0,26.0],"name":"Finland"},
-            "FR": {"currency":"Euro","latlng":[46.0,2.0],"name":"France"},
-            "GB": {"currency":"British pound","latlng":[54.0,-2.0],"name":"United Kingdom"},
-            "GR": {"currency":"Euro","latlng":[39.0,22.0],"name":"Greece"},
-            "HR": {"currency":"Euro","latlng":[45.16666666,15.5],"name":"Croatia"},
-            "HU": {"currency":"Hungarian forint","latlng":[47.0,20.0],"name":"Hungary"},
-            "IE": {"currency":"Euro","latlng":[53.0,-8.0],"name":"Ireland"},
-            "IS": {"currency":"Icelandic króna","latlng":[65.0,-18.0],"name":"Iceland"},
-            "IT": {"currency":"Euro","latlng":[42.83333333,12.83333333],"name":"Italy"},
-            "LT": {"currency":"Euro","latlng":[56.0,24.0],"name":"Lithuania"},
-            "LU": {"currency":"Euro","latlng":[49.75,6.16666666],"name":"Luxembourg"},
-            "LV": {"currency":"Euro","latlng":[57.0,25.0],"name":"Latvia"},
-            "MT": {"currency":"Euro","latlng":[35.9375,14.3754],"name":"Malta"},
-            "NL": {"currency":"Euro","latlng":[52.5,5.75],"name":"Netherlands"},
-            "NO": {"currency":"Norwegian krone","latlng":[62.0,10.0],"name":"Norway"},
-            "PL": {"currency":"Polish złoty","latlng":[52.0,20.0],"name":"Poland"},
-            "PT": {"currency":"Euro","latlng":[39.5,-8.0],"name":"Portugal"},
-            "RO": {"currency":"Romanian leu","latlng":[46.0,25.0],"name":"Romania"},
-            "SE": {"currency":"Swedish krona","latlng":[62.0,15.0],"name":"Sweden"},
-            "SI": {"currency":"Euro","latlng":[46.11666666,14.81666666],"name":"Slovenia"},
-            "SK": {"currency":"Euro","latlng":[48.66666666,19.5],"name":"Slovakia"}
-        };
+        let currentMarkers = [];
+
+        function clearMarkers() {
+            currentMarkers.forEach(marker => map.removeLayer(marker));
+            currentMarkers = [];
+        }
 
         function showCurrencies() {
-            map.eachLayer(layer => {
-                if (layer instanceof L.CircleMarker) {
-                    map.removeLayer(layer);
-                }
-            });
+            clearMarkers();
 
-            for (const countryCode in data) {
-                const country = data[countryCode];
-                if (country.currency) {
-                    const currency = country.currency;
-                    const color = currencyColors[currency] || 'black';
+            fetch('/currencies')
+                .then(response => response.json())
+                .then(data => {
+                    for (const countryCode in data) {
+                        const country = data[countryCode];
+                        if (country.currency) {
+                            const currency = country.currency;
+                            const color = currencyColors[currency] || 'black';
 
-                    const marker = L.circleMarker(country.latlng, {
-                        color: color,
-                        radius: 5
-                    }).addTo(map);
+                            const marker = L.circleMarker(country.latlng, {
+                                color: color,
+                                radius: 5
+                            }).addTo(map);
 
-                    marker.bindPopup(`<b>${country.name}</b><br>Currency: ${country.currency}`);
-                }
-            }
+                            marker.bindPopup(`<b>${country.name}</b><br>Currency: ${country.currency}`);
+                            currentMarkers.push(marker);
+                        }
+                    }
+                });
         }
 
         function showLanguages() {
-            alert("Functionality for showing languages is not implemented yet.");
+            clearMarkers();
+
+            fetch('/languages')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(country => {
+                        const latlng = country.latlng;
+                        const languages = country.languages.join(', ');
+                        const marker = L.marker(latlng)
+                            .addTo(map)
+                            .bindPopup(`<b>${country.name}</b><br>Languages: ${languages}`);
+                        currentMarkers.push(marker);
+                    });
+                });
         }
 
         showCurrencies();
