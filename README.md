@@ -1,5 +1,5 @@
 # Visualization_in_Flask - Europan Currency and Language Family Visualizer
-This is a simple web application that visualizes the official currencies ised across Europan countries.
+This is a simple web application that visualizes the official currencies used across Europan countries.
 
 ## Features
 - Interactive map of Europe showing:
