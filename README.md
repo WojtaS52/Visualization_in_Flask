@@ -3,8 +3,8 @@ This is a simple web application that visualizes the official currencies used ac
 
 ## Features
 - Interactive map of Europe showing:
-  -Each countries official currency
-  -Language family of each country's official languages
+  - Each countries official currency
+  - Language family of each country's official languages
 - Very simple UI
 
 ## Technologies Used
